@@ -1228,7 +1228,7 @@ O projeto segue conforme o planejado."""
             # Aplicar transparência quando ativo
             if self.audio_estado != "idle":
                 cor_botao = self._ajustar_cor_alpha(cor_botao, 0.9)
-            self.btn_audio_control.configure(fg_color=cor_botao)
+            self.btn_audio_control.confsigure(fg_color=cor_botao)
             self.update_button_icon()
     
     def fechar_interface_audio(self):

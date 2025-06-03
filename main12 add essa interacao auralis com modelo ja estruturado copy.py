@@ -44,6 +44,7 @@ class SistemaTFT:
         
         self.usuario_logado = None
         self.frame_atual = None
+        self.gravando = False
         self.timer_ativo = False
         self.contexto_reuniao = None
         
@@ -153,7 +154,7 @@ class SistemaTFT:
         
         self.entry_chat.delete(0, "end")
     
-    # ==================== INTERFACE DE ÁUDIO COM PARTÍCULAS AZUIS ====================
+    # ==================== INTERFACE DE ÁUDIO COM CLIQUE ====================
     def abrir_interface_audio(self):
         """Abre interface de áudio em tela cheia com animação imediata"""
         # Criar nova tela completa para a animação
@@ -163,7 +164,7 @@ class SistemaTFT:
         )
         self.frame_audio_full.place(x=0, y=0, relwidth=1, relheight=1)
         
-        # Canvas para partículas primeiro (no fundo)
+        # Canvas para partículas em tela cheia
         self.canvas_particulas = Canvas(
             self.frame_audio_full,
             width=320,
@@ -171,60 +172,48 @@ class SistemaTFT:
             bg=self.cores["fundo"],
             highlightthickness=0
         )
-        self.canvas_particulas.place(x=0, y=0)
+        self.canvas_particulas.pack(fill="both", expand=True)
         
-        # Área de controle central com fundo visível
+        # Área de controle central
         control_frame = ctk.CTkFrame(
             self.frame_audio_full,
-            fg_color=self.cores["superficie"],
-            width=140,
-            height=140,
-            corner_radius=70,
-            border_width=1,
-            border_color=self.cores["borda"]
+            fg_color="transparent"
         )
         control_frame.place(relx=0.5, rely=0.5, anchor="center")
-        control_frame.pack_propagate(False)
         
-        # Frame padding para centralizar
-        padding_frame = ctk.CTkFrame(control_frame, fg_color="transparent")
-        padding_frame.pack(expand=True)
-        
-        # Botão circular para iniciar/parar
-        self.btn_gravar = ctk.CTkButton(
-            padding_frame,
+        # Botão circular clicável
+        self.btn_microfone = ctk.CTkButton(
+            control_frame,
             text="🎤",
-            width=80,
-            height=80,
-            corner_radius=40,
-            font=ctk.CTkFont(size=32),
+            width=60,
+            height=60,
+            corner_radius=30,
+            font=ctk.CTkFont(size=24),
             fg_color=self.cores["secundaria"],
             hover_color=self.cores["primaria"],
-            border_width=2,
-            border_color=self.cores["primaria"],
-            command=self.toggle_gravacao
+            command=self.alternar_gravacao
         )
-        self.btn_gravar.pack()
+        self.btn_microfone.pack()
         
         # Instrução
         self.label_instrucao = ctk.CTkLabel(
-            padding_frame,
-            text="Clique para iniciar",
+            control_frame,
+            text="Clique para gravar",
             font=ctk.CTkFont(size=11),
-            text_color=self.cores["texto"]
+            text_color=self.cores["texto_secundario"]
         )
         self.label_instrucao.pack(pady=(5, 0))
         
-        # Botão X minimalista no canto (depois dos outros elementos)
+        # Botão X minimalista no canto
         self.btn_fechar = ctk.CTkButton(
             self.frame_audio_full,
             text="✕",
             width=40,
             height=40,
             font=ctk.CTkFont(size=18),
-            fg_color=self.cores["superficie"],
-            text_color=self.cores["texto"],
-            hover_color=self.cores["secundaria"],
+            fg_color="transparent",
+            text_color=self.cores["texto_secundario"],
+            hover_color=self.cores["superficie"],
             corner_radius=20,
             border_width=1,
             border_color=self.cores["borda"],
@@ -236,13 +225,33 @@ class SistemaTFT:
         self.audio_estado = "idle"
         self.animacao_ativa = True
         self.particulas = []
-        self.gravando = False
-        
-        # Forçar atualização da janela
-        self.janela.update()
         
         # Iniciar animação
         self.animar_particulas()
+
+    def alternar_gravacao(self):
+        """Alterna entre estados de gravação ao clicar"""
+        if self.audio_estado == "idle":
+            # Iniciar gravação
+            self.audio_estado = "recording"
+            self.btn_microfone.configure(
+                text="🔴",
+                fg_color=self.cores["audio_ativo"]
+            )
+            self.label_instrucao.configure(text="Gravando... Clique para parar")
+            
+        elif self.audio_estado == "recording":
+            # Parar gravação e processar
+            self.audio_estado = "processing"
+            self.btn_microfone.configure(
+                text="⏳",
+                fg_color=self.cores["audio_processando"],
+                state="disabled"
+            )
+            self.label_instrucao.configure(text="Processando...")
+            
+            # Simular processamento
+            self.janela.after(1500, self.processar_e_fechar)
 
     def animar_particulas(self):
         """Animação de partículas flutuantes"""
@@ -254,17 +263,6 @@ class SistemaTFT:
         # Centro da tela
         centro_x = 160
         centro_y = 120
-        
-        # Desenhar círculo de referência sempre visível
-        for i in range(2):
-            raio = 50 + i * 20
-            alpha = 0.1 - i * 0.05
-            cor = self._ajustar_cor_alpha(self.cores["primaria"], alpha)
-            self.canvas_particulas.create_oval(
-                centro_x - raio, centro_y - raio,
-                centro_x + raio, centro_y + raio,
-                fill="", outline=cor, width=1
-            )
         
         # Adicionar novas partículas
         if self.audio_estado == "recording" and random.random() > 0.7:
@@ -325,7 +323,7 @@ class SistemaTFT:
         if self.audio_estado in ["recording", "processing"]:
             for i in range(3):
                 raio = 30 - i * 8
-                alpha = 0.15 * (1 - i * 0.25)
+                alpha = 0.1 * (1 - i * 0.3)
                 cor = self.cores["glow"] if self.audio_estado == "recording" else self.cores["audio_processando"]
                 cor_glow = self._ajustar_cor_alpha(cor, alpha)
                 
@@ -353,68 +351,23 @@ class SistemaTFT:
         
         return f"#{r:02x}{g:02x}{b:02x}"
 
-    def toggle_gravacao(self):
-        """Alterna entre gravar e parar"""
-        if not self.gravando:
-            # Iniciar gravação
-            self.gravando = True
-            self.audio_estado = "recording"
-            self.btn_gravar.configure(
-                text="⏹", 
-                fg_color=self.cores["perigo"]
-            )
-            self.label_instrucao.configure(text="Gravando... Clique para parar")
-            
-            # Simular processamento após 3 segundos
-            self.timer_processamento = self.janela.after(3000, self.iniciar_processamento)
-        else:
-            # Parar gravação
-            self.gravando = False
-            if hasattr(self, 'timer_processamento'):
-                self.janela.after_cancel(self.timer_processamento)
-            self.finalizar_gravacao()
-    
-    def iniciar_processamento(self):
-        """Inicia processamento automático"""
-        self.audio_estado = "processing"
-        self.btn_gravar.configure(
-            text="⏳",
-            fg_color=self.cores["audio_processando"]
-        )
-        self.label_instrucao.configure(text="Processando...")
-    
-    def finalizar_gravacao(self):
-        """Finaliza gravação e retorna resultado"""
-        # Se ainda estiver gravando, muda para processamento
-        if self.audio_estado == "recording":
-            self.audio_estado = "processing"
-            self.btn_gravar.configure(
-                text="⏳",
-                fg_color=self.cores["audio_processando"]
-            )
-            self.label_instrucao.configure(text="Processando...")
-            
-            # Aguarda um pouco antes de fechar
-            self.janela.after(1000, self._fechar_com_resultado)
-        else:
-            self._fechar_com_resultado()
-    
-    def _fechar_com_resultado(self):
-        """Fecha e adiciona resultado ao chat"""
-        # Adicionar resposta se o chat existir
-        if hasattr(self, 'text_chat'):
-            self.text_chat.configure(state="normal")
-            self.text_chat.insert("end", "🎤 [Comando de voz processado]\n")
-            self.text_chat.insert("end", "🤖 Entendi sua solicitação. Como posso ajudar?\n\n")
-            self.text_chat.configure(state="disabled")
-            self.text_chat.see("end")
+    def processar_e_fechar(self):
+        """Processa e retorna resultado"""
+        # Adicionar resposta
+        self.text_chat.configure(state="normal")
+        self.text_chat.insert("end", "🎤 [Comando de voz processado]\n")
+        self.text_chat.insert("end", "🤖 Aqui está o resumo que você solicitou...\n\n")
+        self.text_chat.configure(state="disabled")
+        self.text_chat.see("end")
         
         # Fechar interface
         self.fechar_audio()
 
     def fechar_audio(self):
-        """Fecha interface de áudio"""
+        """Fecha interface de áudio e volta para assistente"""
         self.animacao_ativa = False
+        
+        # Destruir frame de áudio
         self.frame_audio_full.destroy()
     
     # ==================== OUTROS MÉTODOS NECESSÁRIOS ====================
@@ -586,9 +539,9 @@ class SistemaTFT:
 
 # ==================== INICIALIZAÇÃO ====================
 if __name__ == "__main__":
-    print("🚀 Sistema TFT - Versão com Partículas Azuis")
+    print("🚀 Sistema TFT - Versão com Interface Clicável")
     print("📱 Interface: 320x240 pixels")
-    print("🔵 Animação de processamento com partículas azuis")
+    print("🔵 Clique no botão para gravar")
     print("⚠️ Use ESC para fechar\n")
     
     app = SistemaTFT()
