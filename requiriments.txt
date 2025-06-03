@@ -1,0 +1,62 @@
+# ===================================
+# AURALIS - Arquivo de Dependências
+# ===================================
+
+# Interface Gráfica
+customtkinter==5.2.2
+tkinter-tooltip==2.2.0
+
+# Banco de Dados e Backend
+supabase==2.3.3
+python-dotenv==1.0.0
+
+# Criptografia e Segurança
+bcrypt==4.1.2
+
+# Áudio e Transcrição
+PyAudio==0.2.14
+wave==0.0.2
+openai==1.12.0
+
+# MCP (Model Context Protocol)
+mcp==0.1.0
+fastmcp==0.1.3
+
+# Utilitários Assíncronos
+asyncio==3.4.3
+aiohttp==3.9.3
+
+# Processamento de Dados
+numpy==1.26.3
+pandas==2.2.0
+
+# Logging e Debug
+colorama==0.4.6
+tqdm==4.66.1
+
+# Opcional - Para desenvolvimento
+pytest==8.0.0
+pytest-asyncio==0.23.3
+black==24.1.1
+flake8==7.0.0
+
+# ===================================
+# NOTAS DE INSTALAÇÃO
+# ===================================
+# 
+# 1. Para instalar todas as dependências:
+#    pip install -r requirements.txt
+#
+# 2. PyAudio no Windows pode precisar de:
+#    pip install pipwin
+#    pipwin install pyaudio
+#
+# 3. Para Ubuntu/Debian:
+#    sudo apt-get install portaudio19-dev
+#    pip install pyaudio
+#
+# 4. Para macOS:
+#    brew install portaudio
+#    pip install pyaudio
+#
+# ===================================
