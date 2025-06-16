@@ -1,0 +1,12 @@
+IMPORTANTE: Você precisa criar o arquivo icon.ico nesta pasta!
+
+Passos:
+1. Abra o arquivo generate-icon.html em um navegador
+2. Baixe o PNG gerado
+3. Converta para ICO usando:
+   - https://www.icoconverter.com/
+   - https://cloudconvert.com/png-to-ico
+   - Ou qualquer conversor de sua preferência
+4. Salve o arquivo como icon.ico nesta pasta (build/)
+
+O aplicativo não compilará sem este arquivo!

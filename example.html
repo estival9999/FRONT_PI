@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Recorder Example</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .btn-record { background-color: #ef4444; color: white; }
+        .btn-pause { background-color: #f59e0b; color: white; }
+        .btn-resume { background-color: #10b981; color: white; }
+        .btn-stop { background-color: #6b7280; color: white; }
+        .btn-download { background-color: #3b82f6; color: white; }
+        
+        #visualizer {
+            width: 100%;
+            height: 100px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        #waveform {
+            width: 100%;
+            height: 128px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .info {
+            background: #e0f2fe;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .duration {
+            font-size: 48px;
+            font-weight: bold;
+            color: #1e40af;
+            text-align: center;
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .level-meter {
+            height: 10px;
+            background: #e5e7eb;
+            border-radius: 5px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .level-bar {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.1s;
+        }
+        
+        .status {
+            text-align: center;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: 500;
+        }
+        
+        .status.recording { background: #fee2e2; color: #991b1b; }
+        .status.paused { background: #fef3c7; color: #92400e; }
+        .status.stopped { background: #e0e7ff; color: #3730a3; }
+        
+        .transcription {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 5px;
+            min-height: 50px;
+        }
+        
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Gravador de Áudio com Visualização</h1>
+        
+        <div class="info">
+            <strong>Instruções:</strong> Clique em "Iniciar Gravação" para começar. 
+            O áudio será salvo em formato compatível com OpenAI Whisper.
+        </div>
+        
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <div class="duration" id="duration">00:00</div>
+        
+        <div class="status stopped" id="status">Pronto para gravar</div>
+        
+        <canvas id="visualizer"></canvas>
+        
+        <div class="level-meter">
+            <div class="level-bar" id="levelBar"></div>
+        </div>
+        
+        <div id="waveform"></div>
+        
+        <div class="controls">
+            <button id="btnStart" class="btn-record">
+                🎤 Iniciar Gravação
+            </button>
+            <button id="btnPause" class="btn-pause" disabled>
+                ⏸️ Pausar
+            </button>
+            <button id="btnResume" class="btn-resume" disabled>
+                ▶️ Retomar
+            </button>
+            <button id="btnStop" class="btn-stop" disabled>
+                ⏹️ Parar
+            </button>
+            <button id="btnDownload" class="btn-download" disabled>
+                ⬇️ Baixar
+            </button>
+        </div>
+        
+        <div class="transcription" id="transcription" style="display: none;">
+            <strong>Transcrição:</strong>
+            <div id="transcriptionText"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import AudioRecorder from './src/services/audioRecorder.js';
+        
+        // Elementos DOM
+        const btnStart = document.getElementById('btnStart');
+        const btnPause = document.getElementById('btnPause');
+        const btnResume = document.getElementById('btnResume');
+        const btnStop = document.getElementById('btnStop');
+        const btnDownload = document.getElementById('btnDownload');
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        const durationEl = document.getElementById('duration');
+        const statusEl = document.getElementById('status');
+        const levelBar = document.getElementById('levelBar');
+        const errorEl = document.getElementById('error');
+        
+        // Ajustar canvas
+        canvas.width = canvas.offsetWidth;
+        canvas.height = canvas.offsetHeight;
+        
+        let recorder = null;
+        let recordedBlob = null;
+        let durationInterval = null;
+        
+        // Mostrar erro
+        function showError(message) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Formatar duração
+        function formatDuration(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Desenhar visualização
+        function drawVisualization(waveformData) {
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Limpar canvas
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Desenhar forma de onda
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = '#3b82f6';
+            ctx.beginPath();
+            
+            const sliceWidth = width / waveformData.length;
+            let x = 0;
+            
+            for (let i = 0; i < waveformData.length; i++) {
+                const v = waveformData[i] / 128.0;
+                const y = v * height / 2;
+                
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                x += sliceWidth;
+            }
+            
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+        }
+        
+        // Inicializar gravador
+        async function initRecorder() {
+            try {
+                recorder = new AudioRecorder();
+                await recorder.initialize();
+                
+                // Configurar callback de visualização
+                recorder.setVisualizationCallback((data) => {
+                    // Atualizar nível de áudio
+                    levelBar.style.width = `${data.audioLevel * 100}%`;
+                    
+                    // Desenhar forma de onda
+                    drawVisualization(data.waveformData);
+                });
+                
+                console.log('Gravador inicializado com sucesso');
+            } catch (error) {
+                showError('Erro ao inicializar gravador: ' + error.message);
+                console.error(error);
+            }
+        }
+        
+        // Atualizar interface
+        function updateUI(state) {
+            btnStart.disabled = state === 'recording' || state === 'paused';
+            btnPause.disabled = state !== 'recording';
+            btnResume.disabled = state !== 'paused';
+            btnStop.disabled = state === 'stopped';
+            btnDownload.disabled = !recordedBlob;
+            
+            statusEl.className = 'status ' + state;
+            statusEl.textContent = {
+                'stopped': 'Pronto para gravar',
+                'recording': 'Gravando...',
+                'paused': 'Pausado'
+            }[state];
+        }
+        
+        // Event handlers
+        btnStart.addEventListener('click', async () => {
+            if (!recorder) {
+                await initRecorder();
+            }
+            
+            try {
+                recorder.start();
+                recordedBlob = null;
+                updateUI('recording');
+                
+                // Iniciar contador de duração
+                durationInterval = setInterval(() => {
+                    durationEl.textContent = formatDuration(recorder.getDuration());
+                }, 100);
+            } catch (error) {
+                showError('Erro ao iniciar gravação: ' + error.message);
+            }
+        });
+        
+        btnPause.addEventListener('click', () => {
+            recorder.pause();
+            updateUI('paused');
+        });
+        
+        btnResume.addEventListener('click', () => {
+            recorder.resume();
+            updateUI('recording');
+        });
+        
+        btnStop.addEventListener('click', async () => {
+            try {
+                recordedBlob = await recorder.stop();
+                clearInterval(durationInterval);
+                updateUI('stopped');
+                
+                // Mostrar área de transcrição (se houver integração com API)
+                document.getElementById('transcription').style.display = 'block';
+                document.getElementById('transcriptionText').textContent = 
+                    'Para transcrever, integre com a API OpenAI Whisper';
+            } catch (error) {
+                showError('Erro ao parar gravação: ' + error.message);
+            }
+        });
+        
+        btnDownload.addEventListener('click', () => {
+            if (recordedBlob) {
+                recorder.downloadAudio(recordedBlob, `gravacao_${Date.now()}.webm`);
+            }
+        });
+        
+        // Inicializar ao carregar
+        window.addEventListener('load', async () => {
+            await initRecorder();
+        });
+        
+        // Limpar ao sair
+        window.addEventListener('beforeunload', () => {
+            if (recorder) {
+                recorder.destroy();
+            }
+        });
+    </script>
+</body>
+</html>

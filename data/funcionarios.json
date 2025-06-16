@@ -1,0 +1,124 @@
+{
+  "funcionarios": [
+    {
+      "id": 1,
+      "nome": "Ana Carolina Silva Santos",
+      "cargo": "Gerente de Projetos",
+      "departamento": "TI"
+    },
+    {
+      "id": 2,
+      "nome": "João Pedro Oliveira Costa",
+      "cargo": "Desenvolvedor Senior",
+      "departamento": "TI"
+    },
+    {
+      "id": 3,
+      "nome": "Maria Fernanda Almeida Lima",
+      "cargo": "Analista de RH",
+      "departamento": "Recursos Humanos"
+    },
+    {
+      "id": 4,
+      "nome": "Carlos Eduardo Pereira Souza",
+      "cargo": "Coordenador Financeiro",
+      "departamento": "Financeiro"
+    },
+    {
+      "id": 5,
+      "nome": "Beatriz Rodrigues Ferreira",
+      "cargo": "Designer UX/UI",
+      "departamento": "Design"
+    },
+    {
+      "id": 6,
+      "nome": "Lucas Gabriel Martins Barbosa",
+      "cargo": "Analista de Marketing",
+      "departamento": "Marketing"
+    },
+    {
+      "id": 7,
+      "nome": "Juliana Cristina Gomes Ribeiro",
+      "cargo": "Desenvolvedora Pleno",
+      "departamento": "TI"
+    },
+    {
+      "id": 8,
+      "nome": "Rafael Henrique Castro Araújo",
+      "cargo": "Gerente Comercial",
+      "departamento": "Vendas"
+    },
+    {
+      "id": 9,
+      "nome": "Camila Vitória Melo Cardoso",
+      "cargo": "Analista Contábil",
+      "departamento": "Financeiro"
+    },
+    {
+      "id": 10,
+      "nome": "Fernando Augusto Rocha Pinto",
+      "cargo": "Coordenador de TI",
+      "departamento": "TI"
+    },
+    {
+      "id": 11,
+      "nome": "Patricia Santos Carvalho Dias",
+      "cargo": "Supervisora de RH",
+      "departamento": "Recursos Humanos"
+    },
+    {
+      "id": 12,
+      "nome": "Bruno Leonardo Nascimento Cruz",
+      "cargo": "Analista de Sistemas",
+      "departamento": "TI"
+    },
+    {
+      "id": 13,
+      "nome": "Amanda Beatriz Correia Nunes",
+      "cargo": "Gerente de Marketing",
+      "departamento": "Marketing"
+    },
+    {
+      "id": 14,
+      "nome": "Thiago Alexandre Mendes Lopes",
+      "cargo": "Desenvolvedor Junior",
+      "departamento": "TI"
+    },
+    {
+      "id": 15,
+      "nome": "Larissa Eduarda Moreira Freitas",
+      "cargo": "Analista de Vendas",
+      "departamento": "Vendas"
+    },
+    {
+      "id": 16,
+      "nome": "Diego Francisco Azevedo Teixeira",
+      "cargo": "Coordenador de Logística",
+      "departamento": "Operações"
+    },
+    {
+      "id": 17,
+      "nome": "Gabriela Aparecida Duarte Campos",
+      "cargo": "Especialista em Dados",
+      "departamento": "TI"
+    },
+    {
+      "id": 18,
+      "nome": "Rodrigo Cesar Monteiro Vieira",
+      "cargo": "Supervisor de Produção",
+      "departamento": "Operações"
+    },
+    {
+      "id": 19,
+      "nome": "Isabela Regina Barros Andrade",
+      "cargo": "Analista de Qualidade",
+      "departamento": "Qualidade"
+    },
+    {
+      "id": 20,
+      "nome": "Matheus Vinicius Ramos Machado",
+      "cargo": "Assistente Administrativo",
+      "departamento": "Administrativo"
+    }
+  ]
+}
