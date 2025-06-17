@@ -1,0 +1,14 @@
+{
+  "funcionarios": [
+    {"id": 1, "nome": "Mateus Estival", "departamento": "TI", "cargo": "Desenvolvedor"},
+    {"id": 2, "nome": "João Silva", "departamento": "Vendas", "cargo": "Gerente"},
+    {"id": 3, "nome": "Maria Santos", "departamento": "RH", "cargo": "Analista"},
+    {"id": 4, "nome": "Pedro Oliveira", "departamento": "Financeiro", "cargo": "Coordenador"},
+    {"id": 5, "nome": "Ana Costa", "departamento": "Marketing", "cargo": "Designer"},
+    {"id": 6, "nome": "Carlos Ferreira", "departamento": "TI", "cargo": "Analista de Sistemas"},
+    {"id": 7, "nome": "Juliana Mendes", "departamento": "Vendas", "cargo": "Vendedor"},
+    {"id": 8, "nome": "Roberto Alves", "departamento": "Operações", "cargo": "Supervisor"},
+    {"id": 9, "nome": "Fernanda Lima", "departamento": "RH", "cargo": "Gerente"},
+    {"id": 10, "nome": "Lucas Martins", "departamento": "TI", "cargo": "DevOps"}
+  ]
+}
